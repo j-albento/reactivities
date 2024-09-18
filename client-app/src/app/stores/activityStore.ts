@@ -2,6 +2,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { Activity } from "../layout/models/activity";
 import agent from "../api/agent";
 import { v4 as uuid } from "uuid";
+import { format } from "date-fns";
 
 export default class ActivityStore {
     activityRegistry = new Map<string, Activity>();
@@ -17,7 +18,7 @@ export default class ActivityStore {
     // sorts the activities by date in ascending order
     get activitiesByDate() {
         return Array.from(this.activityRegistry.values()).sort(
-            (a, b) => Date.parse(a.date) - Date.parse(b.date)
+            (a, b) => a.date!.getTime() - b.date!.getTime()
         );
     }
 
@@ -26,7 +27,8 @@ export default class ActivityStore {
             // an array of objects, with each object having a key as the activity date
             // and for each date, will have an array of activities
             this.activitiesByDate.reduce((activities, activity) => {
-                const date = activity.date;
+                const date = format(activity.date!, "dd MMM yyyy");
+
                 activities[date] = activities[date]
                     ? [...activities[date], activity]
                     : [activity];
@@ -76,7 +78,7 @@ export default class ActivityStore {
     };
 
     private setActivity = (activity: Activity) => {
-        activity.date = activity.date.split("T")[0];
+        activity.date = new Date(activity.date!);
         this.activityRegistry.set(activity.id, activity);
     };
 
