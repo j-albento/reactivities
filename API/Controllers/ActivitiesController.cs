@@ -6,19 +6,18 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [AllowAnonymous]
     public class ActivitiesController : BaseApiController
     {
 
         [HttpGet] // api/activities
-        public async Task<ActionResult<List<Activity>>> GetActivities(CancellationToken ct)
+        public async Task<ActionResult> GetActivities()
         {
             var result = await Mediator.Send(new List.Query());
             return HandleResult(result);
         }
 
         [HttpGet("{id}")] // api/activities/{id}
-        public async Task<ActionResult<Activity>> GetActivity(Guid id)
+        public async Task<ActionResult> GetActivity(Guid id)
         {
             var result = await Mediator.Send(new Details.Query { Id = id });
             return HandleResult(result);
@@ -31,6 +30,8 @@ namespace API.Controllers
             return HandleResult(result);
         }
 
+
+        [Authorize(Policy = "IsActivityHost")]
         [HttpPut("{id}")]
         public async Task<IActionResult> EditActivity(Guid id, Activity activity)
         {
@@ -40,11 +41,18 @@ namespace API.Controllers
 
         }
 
+        [Authorize(Policy = "IsActivityHost")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteActivity(Guid id)
         {
             var result = await Mediator.Send(new Delete.Command { Id = id });
             return HandleResult(result);
+        }
+
+        [HttpPost("{id}/attend")]
+        public async Task<IActionResult> Attend(Guid id)
+        {
+            return HandleResult(await Mediator.Send(new UpdateAttendance.Command { Id = id }));
         }
     }
 

@@ -1,4 +1,5 @@
 using API;
+using API.Extensions;
 using API.Middleware;
 using Domain;
 using Microsoft.AspNetCore.Authorization;
@@ -20,7 +21,7 @@ builder.Services.AddControllers(opt =>
 
 // from ApplicationServiceExtensions.cs
 builder.Services.AddApplicationServices(builder.Configuration);
-
+builder.Services.AddIdentityServices(builder.Configuration);
 
 var app = builder.Build();
 
